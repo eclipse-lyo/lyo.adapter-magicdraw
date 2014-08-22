@@ -1,0 +1,25 @@
+/*********************************************************************************************
+ * Copyright (c) 2014 Model-Based Systems Engineering Center, Georgia Institute of Technology.
+ *                         http://www.mbse.gatech.edu/
+ *                  http://www.mbsec.gatech.edu/research/oslc
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  and Eclipse Distribution License v. 1.0 which accompanies this distribution.
+ *
+ *  The Eclipse Public License is available at http://www.eclipse.org/legal/epl-v10.html
+ *  and the Eclipse Distribution License is available at
+ *  http://www.eclipse.org/org/documents/edl-v10.php.
+ *
+ *  Contributors:
+ *
+ *	   Axel Reichwein, Koneksys (axel.reichwein@koneksys.com)		
+ *******************************************************************************************/
+
+
+package org.eclipse.lyo.adapter.magicdraw.resources;
+
+public enum SysMLFlowDirection {
+	IN,
+	OUT
+}
