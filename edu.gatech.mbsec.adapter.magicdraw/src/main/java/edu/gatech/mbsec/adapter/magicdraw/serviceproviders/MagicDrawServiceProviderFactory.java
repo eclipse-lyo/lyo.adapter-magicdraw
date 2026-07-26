@@ -28,7 +28,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 
 import edu.gatech.mbsec.adapter.magicdraw.resources.Constants;
-import org.eclipse.lyo.oslc4j.client.ServiceProviderRegistryURIs;
+import edu.gatech.mbsec.adapter.magicdraw.application.MagicDrawManager;
 import org.eclipse.lyo.oslc4j.core.exception.OslcCoreApplicationException;
 import org.eclipse.lyo.oslc4j.core.model.OslcConstants;
 import org.eclipse.lyo.oslc4j.core.model.PrefixDefinition;
@@ -97,8 +97,7 @@ public class MagicDrawServiceProviderFactory {
 			final String product, final Map<String, Object> parameterValueMap)
 			throws OslcCoreApplicationException, URISyntaxException {
 		final ServiceProvider serviceProvider = ServiceProviderFactory
-				.createServiceProvider(baseURI, ServiceProviderRegistryURIs
-						.getUIURI(), product,
+				.createServiceProvider(baseURI, MagicDrawManager.baseHTTPURI + "/services/catalog/singleton", product,
 						"Service provider for MagicDraw project: " + product,
 						new Publisher("Georgia Institute of Technology OSLC Project",
 								"urn:oslc:ServiceProvider"), RESOURCE_CLASSES,

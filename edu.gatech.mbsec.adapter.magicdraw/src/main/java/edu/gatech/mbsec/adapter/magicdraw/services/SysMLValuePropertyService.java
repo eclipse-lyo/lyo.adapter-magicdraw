@@ -24,29 +24,29 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HEAD;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.EntityTag;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 import org.eclipse.emf.ecore.EClass;
 import edu.gatech.mbsec.adapter.magicdraw.resources.Constants;
@@ -131,7 +131,7 @@ public class SysMLValuePropertyService extends HttpServlet {
 			throws URISyntaxException {
 		MagicDrawManager.loadSysMLProjects();
 		SysMLValueProperty sysMLValueProperty = MagicDrawManager
-				.getValuePropertyByQualifiedName(projectId + "/valueproperties/" + propertyQualifiedName);
+				.getValuePropertyByQualifiedName(projectId, propertyQualifiedName);
 		if(sysMLValueProperty == null){
 			return Response.status(HttpServletResponse.SC_INTERNAL_SERVER_ERROR).build();
 		}
@@ -191,7 +191,7 @@ public class SysMLValuePropertyService extends HttpServlet {
 			throws URISyntaxException, IOException {
 		MagicDrawManager.loadSysMLProjects();
 		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLValueProperty sysmlValueProperty = MagicDrawManager
-				.getValuePropertyByQualifiedName(projectId + "/valueproperties/" + qualifiedName);
+				.getValuePropertyByQualifiedName(projectId, qualifiedName);
 
 		String requestURL = httpServletRequest.getRequestURL().toString();
 		if (sysmlValueProperty != null) {
@@ -221,16 +221,9 @@ public class SysMLValuePropertyService extends HttpServlet {
 
 		List<String> possibleValueTypes = new ArrayList<String>();
 		possibleValueTypes.add("NONE");
-		for (com.nomagic.uml2.ext.magicdraw.classes.mdkernel.DataType mdValueType : MagicDrawManager.mdSysmlValueTypes) {
-			possibleValueTypes.add("VALUETYPE___"
-					+ mdValueType.getQualifiedName());
-		}
 
 		List<String> possibleBlocks = new ArrayList<String>();
 		possibleValueTypes.add("NONE");
-		for (com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Class mdBlock : MagicDrawManager.mdSysmlBlocks) {
-			possibleBlocks.add("BLOCK___" + mdBlock.getQualifiedName());
-		}
 
 		EClass eClass = ServiceUtil.getEClass("ValueProperty");
 		
@@ -354,7 +347,7 @@ public class SysMLValuePropertyService extends HttpServlet {
 		String incomingValuePropertyURI = sysMLValueProperty.getAbout().toString();
 		incomingValuePropertyURI = incomingValuePropertyURI.replace(MagicDrawManager.baseHTTPURI + "/services/" + projectId + "/valueproperties/", "");
 		SysMLValueProperty sysMLValuePropertyToUpdate = MagicDrawManager
-				.getValuePropertyByQualifiedName(projectId + "/valueproperties/" + incomingValuePropertyURI);
+				.getValuePropertyByQualifiedName(projectId, incomingValuePropertyURI);
 		EntityTag eTag = new EntityTag(md5Java(sysMLValuePropertyToUpdate));
 		
 		// just for debug/checking purposes
@@ -387,7 +380,7 @@ public class SysMLValuePropertyService extends HttpServlet {
 		MagicDrawManager.makeSysMLProjectActive(projectId);
 		
 		SysMLValueProperty sysMLValueProperty = MagicDrawManager
-				.getValuePropertyByQualifiedName(projectId + "/valueproperties/" + propertyQualifiedName);
+				.getValuePropertyByQualifiedName(projectId, propertyQualifiedName);
 		EntityTag eTag = new EntityTag(
 				md5Java(sysMLValueProperty));
 		String requestETag = httpServletRequest.getHeader("If-None-Match");

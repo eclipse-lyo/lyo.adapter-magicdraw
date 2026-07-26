@@ -39,12 +39,10 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
-import edu.gatech.mbsec.adapter.subversion.SubversionServiceProviderFactory;
-import org.eclipse.lyo.oslc4j.client.ServiceProviderRegistryURIs;
 import org.eclipse.lyo.oslc4j.core.exception.OslcCoreApplicationException;
 import org.eclipse.lyo.oslc4j.core.model.Publisher;
 import org.eclipse.lyo.oslc4j.core.model.Service;
@@ -73,7 +71,7 @@ public class ServiceProviderCatalogSingleton {
 	static {
 		try {
 			serviceProviderCatalog = new ServiceProviderCatalog();
-			serviceProviderCatalog.setAbout(new URI(ServiceProviderRegistryURIs.getServiceProviderRegistryURI()));
+			serviceProviderCatalog.setAbout(new URI(MagicDrawManager.baseHTTPURI + "/services/catalog/singleton"));
 			serviceProviderCatalog.setTitle("OSLC Service Provider Catalog");
 			serviceProviderCatalog.setDescription("OSLC Service Provider Catalog");
 			serviceProviderCatalog.setPublisher(new Publisher("Georgia Institute of Technology OSLC Project",
@@ -223,60 +221,22 @@ public class ServiceProviderCatalogSingleton {
 	protected static synchronized void initServiceProvidersFromProjects(HttpServletRequest httpServletRequest) {
 		try {
 
-			if (MagicDrawManager.magicdrawModelsDirectory != null) {
-				File directory = new File(OSLC4JMagicDrawApplication.magicdrawModelsDirectory);
-				Collection<String> magicDrawProjectNames = new ArrayList<String>();
+						final Collection<String> magicDrawProjectNames = MagicDrawManager.getProjectNames();
 
-				
-					for (File file : MagicDrawManager.getMagicDrawModels(
-							OSLC4JMagicDrawApplication.magicdrawModelsDirectory, new ArrayList<File>())) {
-						if (file.getPath().endsWith("mdzip")) {
-							String[] filePathSegments = file.getPath().split("\\\\");
-							String fileName = filePathSegments[filePathSegments.length - 1];
-							fileName = fileName.replaceAll(".mdzip", "");							
-							if(OSLC4JMagicDrawApplication.useIndividualSubversionFiles){
-								String dirName = filePathSegments[filePathSegments.length - 2];
-								magicDrawProjectNames.add(dirName + "---" + fileName);
-							}
-							else{
-								magicDrawProjectNames.add(fileName);
-							}
-						}
-					}
-				
-
-				
-
-				// registering serviceproviders for MagicDraw files
-				String basePath = MagicDrawManager.baseHTTPURI + "/services";
-				for (String magicDrawProjectName : magicDrawProjectNames) {
-					if (!serviceProviders.containsKey(magicDrawProjectName)) {
-						Map<String, Object> parameterMap = new HashMap<String, Object>();
-						// parameter map captures parameter names used in JAX-RS
-						// @Path annotations
-						parameterMap.put("projectId", magicDrawProjectName);
-						final ServiceProvider magicdrawServiceProvider = MagicDrawServiceProviderFactory
-								.createServiceProvider(basePath, magicDrawProjectName, parameterMap);
-						registerServiceProvider(basePath, magicdrawServiceProvider, magicDrawProjectName);
-					}
+			// registering serviceproviders for the loaded projects
+			final String basePath = MagicDrawManager.baseHTTPURI + "/services";
+			for (String magicDrawProjectName : magicDrawProjectNames) {
+				if (!serviceProviders.containsKey(magicDrawProjectName)) {
+					final Map<String, Object> parameterMap = new HashMap<String, Object>();
+					// parameter map captures parameter names used in JAX-RS
+					// @Path annotations
+					parameterMap.put("projectId", magicDrawProjectName);
+					final ServiceProvider magicdrawServiceProvider = MagicDrawServiceProviderFactory
+							.createServiceProvider(basePath, magicDrawProjectName, parameterMap);
+					registerServiceProvider(basePath, magicdrawServiceProvider, magicDrawProjectName);
 				}
+			}
 
-				// registering serviceprovider for Subversion files
-				if (!serviceProviders.containsKey("subversionfiles")) {
-					// add subversion file service provider
-					ServiceProvider subversionFileServiceProvider;
-					try {
-						subversionFileServiceProvider = SubversionServiceProviderFactory.createServiceProvider(basePath,
-								"Subversion Files");
-						registerServiceProvider(basePath, subversionFileServiceProvider, "subversionfiles");
-					} catch (OslcCoreApplicationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
 
 				// deregister service provider if MagicDraw model no longer
 				// exists
@@ -293,7 +253,6 @@ public class ServiceProviderCatalogSingleton {
 					}
 				}
 
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();

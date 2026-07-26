@@ -23,25 +23,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.Status;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EcorePackage;
@@ -119,7 +119,7 @@ public class SysMLBlockService extends HttpServlet {
 			throws URISyntaxException {
 		MagicDrawManager.loadSysMLProjects();
 		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLBlock sysmlBlock = MagicDrawManager
-				.getBlockByQualifiedName(projectId + "/blocks/" + blockQualifiedName);
+				.getBlockByQualifiedName(projectId, blockQualifiedName);
 		return sysmlBlock;
 	}
 
@@ -154,7 +154,7 @@ public class SysMLBlockService extends HttpServlet {
 			throws URISyntaxException, IOException {
 		MagicDrawManager.loadSysMLProjects();
 		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLBlock sysmlBlock = MagicDrawManager
-				.getBlockByQualifiedName(projectId + "/blocks/" + blockQualifiedName);
+				.getBlockByQualifiedName(projectId, blockQualifiedName);
 
 		String requestURL = httpServletRequest.getRequestURL().toString();
 		if (sysmlBlock != null) {			
@@ -179,7 +179,7 @@ public class SysMLBlockService extends HttpServlet {
 
 		MagicDrawManager.loadSysMLProjects();
 			
-		List<SysMLModel> sysmlModels = MagicDrawManager.getModels();		
+		List<SysMLModel> sysmlModels = MagicDrawManager.getModels(projectId);
 		List<String> possibleOwnerElements = new ArrayList<String>();
 		List<String> possibleBlocks = new ArrayList<String>();
 		possibleBlocks.add("NONE");
@@ -189,18 +189,6 @@ public class SysMLBlockService extends HttpServlet {
 			possibleOwnerElements.add("MODEL___"
 					+ MagicDrawManager.getQualifiedNameFromURI(sysMLModel
 							.getAbout()));
-		}
-		for (com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Package mdPackage : MagicDrawManager.mdSysmlPackages) {
-			possibleOwnerElements.add("PACKAGE___"
-					+ mdPackage.getQualifiedName());
-		}
-		for (com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Class mdBlock : MagicDrawManager.mdSysmlBlocks) {
-			possibleBlocks.add("BLOCK___"
-					+ mdBlock.getQualifiedName());
-		}
-		for (com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Class mdRequirement : MagicDrawManager.mdSysmlRequirements) {
-			possibleRequirements.add("REQUIREMENT___"
-					+mdRequirement.getQualifiedName());
 		}
 
 		EClass eClass = ServiceUtil.getEClass("Block");

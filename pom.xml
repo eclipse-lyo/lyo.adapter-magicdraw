@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>edu.gatech.mbsec.adapter.magicdraw</groupId>
+	<artifactId>oslc4jmagicdraw-parent</artifactId>
+	<version>1.1.0</version>
+	<packaging>pom</packaging>
+	<name>OSLC MagicDraw SysML Adapter (parent)</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Lyo version managed centrally via the lyo-bom import below -->
+		<version.lyo>7.0.0.Beta1</version.lyo>
+		<version.jersey>3.1.5</version.jersey>
+		<version.jetty>12.0.16</version.jetty>
+		<jetty.http.port>8080</jetty.http.port>
+		<!-- Used as metadata for the system-scoped MagicDraw SDK dependencies. A
+		     concrete version profile overrides it when building a legacy
+		     MagicDraw distribution. -->
+		<magicdraw.version>17.x</magicdraw.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Eclipse Lyo 7 BOM: pins all Lyo-covered dependency versions
+			     (Jena/classgraph, httpclient, commons-lang3, Jackson, SLF4J, ...)
+			     and manages the org.eclipse.lyo.* artifacts used here. -->
+			<dependency>
+				<groupId>org.eclipse.lyo</groupId>
+				<artifactId>lyo-bom</artifactId>
+				<version>${version.lyo}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- JAX-RS 3.0 runtime (Jersey, jakarta namespace) -->
+			<dependency>
+				<groupId>org.glassfish.jersey.core</groupId>
+				<artifactId>jersey-server</artifactId>
+				<version>${version.jersey}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.containers</groupId>
+				<artifactId>jersey-container-servlet</artifactId>
+				<version>${version.jersey}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-hk2</artifactId>
+				<version>${version.jersey}</version>
+			</dependency>
+
+			<!-- Servlet / JSP APIs (jakarta namespace, Jakarta EE 10) -->
+			<dependency>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
+				<version>6.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.servlet.jsp.jstl</groupId>
+				<artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+				<version>3.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>jakarta.servlet.jsp.jstl</artifactId>
+				<version>3.0.1</version>
+			</dependency>
+
+			<!-- Test -->
+			<dependency>
+				<groupId>io.rest-assured</groupId>
+				<artifactId>rest-assured</artifactId>
+				<version>6.0.1</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>5.10.2</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<modules>
+		<module>edu.gatech.mbsec.adapter.magicdraw.ecore</module>
+		<module>edu.gatech.mbsec.adapter.magicdraw.resources</module>
+		<module>edu.gatech.mbsec.adapter.magicdraw.repo-api</module>
+		<module>edu.gatech.mbsec.adapter.magicdraw</module>
+	</modules>
+
+	<profiles>
+		<profile>
+			<id>non-standalone</id>
+			<modules>
+				<module>edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw</module>
+				<module>edu.gatech.mbsec.adapter.magicdraw.distribution</module>
+			</modules>
+		</profile>
+		<!--
+			The version profiles replace the historical workflow of copying a
+			version-specific POM over edu.gatech.mbsec.adapter.magicdraw/pom.xml.
+			-Dmagicdraw.installdir always takes precedence over these legacy
+			Windows installation defaults.
+		-->
+		<profile>
+			<id>magicdraw-17.0.3-sp1</id>
+			<properties>
+				<magicdraw.version>17.0.3</magicdraw.version>
+				<magicdraw.installdir>C:/Program Files/MagicDraw UML</magicdraw.installdir>
+			</properties>
+			<modules>
+				<module>edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw</module>
+				<module>edu.gatech.mbsec.adapter.magicdraw.distribution</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>magicdraw-17.0.4-sp2</id>
+			<properties>
+				<magicdraw.version>17.0.4</magicdraw.version>
+				<magicdraw.installdir>C:/Program Files/MagicDraw UML17.0.4 SP2</magicdraw.installdir>
+			</properties>
+			<modules>
+				<module>edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw</module>
+				<module>edu.gatech.mbsec.adapter.magicdraw.distribution</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>magicdraw-17.0.5-sp1</id>
+			<properties>
+				<magicdraw.version>17.0.5</magicdraw.version>
+				<magicdraw.installdir>C:/Program Files/MagicDraw</magicdraw.installdir>
+			</properties>
+			<modules>
+				<module>edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw</module>
+				<module>edu.gatech.mbsec.adapter.magicdraw.distribution</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>magicdraw-18.0.1-sp1</id>
+			<properties>
+				<magicdraw.version>18.0.1</magicdraw.version>
+				<magicdraw.installdir>C:/Program Files/MagicDraw</magicdraw.installdir>
+			</properties>
+			<modules>
+				<module>edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw</module>
+				<module>edu.gatech.mbsec.adapter.magicdraw.distribution</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>magicdraw-18.0-sp6</id>
+			<properties>
+				<magicdraw.version>18.0</magicdraw.version>
+				<magicdraw.installdir>C:/Program Files/MagicDraw</magicdraw.installdir>
+			</properties>
+			<modules>
+				<module>edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw</module>
+				<module>edu.gatech.mbsec.adapter.magicdraw.distribution</module>
+			</modules>
+		</profile>
+	</profiles>
+
+	<repositories>
+		<repository>
+			<id>lyo-releases</id>
+			<name>Eclipse Lyo Releases</name>
+			<url>https://repo.eclipse.org/content/repositories/lyo-releases/</url>
+		</repository>
+		<repository>
+			<id>lyo-snapshots</id>
+			<name>Eclipse Lyo Snapshots</name>
+			<url>https://repo.eclipse.org/content/repositories/lyo-snapshots/</url>
+			<releases><enabled>false</enabled></releases>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.jetty.ee10</groupId>
+				<artifactId>jetty-ee10-maven-plugin</artifactId>
+				<version>${version.jetty}</version>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.13.0</version>
+					<configuration>
+						<source>${maven.compiler.source}</source>
+						<target>${maven.compiler.target}</target>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

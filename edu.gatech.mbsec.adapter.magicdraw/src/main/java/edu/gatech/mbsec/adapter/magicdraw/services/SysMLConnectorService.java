@@ -21,24 +21,24 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import org.eclipse.emf.ecore.EClass;
 import edu.gatech.mbsec.adapter.magicdraw.resources.Constants;
@@ -59,8 +59,6 @@ import org.eclipse.lyo.oslc4j.core.model.Link;
 import org.eclipse.lyo.oslc4j.core.model.OslcConstants;
 import org.eclipse.lyo.oslc4j.core.model.OslcMediaType;
 
-import com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Property;
-import com.nomagic.uml2.ext.magicdraw.compositestructures.mdports.Port;
 
 import edu.gatech.mbsec.adapter.magicdraw.application.MagicDrawManager;
 
@@ -125,7 +123,7 @@ public class SysMLConnectorService extends HttpServlet {
 			throws URISyntaxException {
 		MagicDrawManager.loadSysMLProjects();
 		SysMLConnector sysMLConnector = MagicDrawManager
-				.getConnectorByQualifiedName(projectId + "/connectors/" + propertyQualifiedName);
+				.getConnectorByQualifiedName(projectId, propertyQualifiedName);
 		return sysMLConnector;
 	}
 
@@ -161,7 +159,7 @@ public class SysMLConnectorService extends HttpServlet {
 			throws URISyntaxException, IOException {
 		MagicDrawManager.loadSysMLProjects();
 		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLConnector sysmlConnector = MagicDrawManager
-				.getConnectorByQualifiedName(projectId + "/connectors/" + qualifiedName);
+				.getConnectorByQualifiedName(projectId, qualifiedName);
 
 		String requestURL = httpServletRequest.getRequestURL().toString();
 		if (sysmlConnector != null) {			
@@ -189,24 +187,12 @@ public class SysMLConnectorService extends HttpServlet {
 		
 		List<String> possibleBlocks = new ArrayList<String>();
 		possibleBlocks.add("NONE");
-		for (com.nomagic.uml2.ext.magicdraw.classes.mdkernel.Class mdBlock : MagicDrawManager.mdSysmlBlocks) {
-			possibleBlocks.add("BLOCK___"
-					+ mdBlock.getQualifiedName());
-		}
 		
 		List<String> possibleParts = new ArrayList<String>();
 		possibleParts.add("NONE");
-		for (Property mdPart : MagicDrawManager.mdSysmlPartProperties) {
-			possibleParts.add("PART___"
-					+ mdPart.getQualifiedName());
-		}
 
 		List<String> possiblePorts = new ArrayList<String>();
 		possiblePorts.add("NONE");
-		for (Port mdPort : MagicDrawManager.mdSysmlPorts) {
-			possibleParts.add("PORT___"
-					+ mdPort.getQualifiedName());
-		}
 
 		List<String> possibleRoles = new ArrayList<String>();
 		possibleRoles.addAll(possibleParts);

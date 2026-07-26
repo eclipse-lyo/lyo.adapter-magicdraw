@@ -19,21 +19,21 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 
 import edu.gatech.mbsec.adapter.magicdraw.resources.Constants;
 import edu.gatech.mbsec.adapter.magicdraw.resources.SysMLFullPort;
@@ -106,7 +106,7 @@ public class SysMLFullPortService extends HttpServlet{
 	@Produces({ OslcMediaType.APPLICATION_RDF_XML, OslcMediaType.APPLICATION_JSON})
 	public edu.gatech.mbsec.adapter.magicdraw.resources.SysMLFullPort getFullPort(@PathParam("projectId") final String projectId, @PathParam("propertyQualifiedName") final String propertyQualifiedName) throws URISyntaxException  {
 		MagicDrawManager.loadSysMLProjects();
-		SysMLFullPort sysMLFullPort = MagicDrawManager.getFullPortByQualifiedName(projectId + "/fullports/" + propertyQualifiedName);
+		SysMLFullPort sysMLFullPort = MagicDrawManager.getFullPortByQualifiedName(projectId, propertyQualifiedName);
 		return sysMLFullPort;
 	}
 
@@ -142,7 +142,7 @@ public class SysMLFullPortService extends HttpServlet{
 			@QueryParam("oslc.prefix") final String prefix)
 			throws URISyntaxException, IOException {
 		MagicDrawManager.loadSysMLProjects();
-		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLFullPort sysmlFullPort = MagicDrawManager.getFullPortByQualifiedName(projectId + "/fullports/" + qualifiedName);
+		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLFullPort sysmlFullPort = MagicDrawManager.getFullPortByQualifiedName(projectId, qualifiedName);
 	
 		String requestURL = httpServletRequest.getRequestURL().toString();
 		if (sysmlFullPort !=null )

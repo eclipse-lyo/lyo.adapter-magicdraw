@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  File-based SysML model used by SysmlRepositoryStandaloneImpl (the default,
+  no-MagicDraw backend). The structure mirrors the element/attribute names the
+  standalone repository parser expects:
+
+    <project id="...">
+      <model name="..."/>
+      <block name="..."> ...nested elements... </block>
+      <package name="..."/>
+      <requirement id="..." name="..."/>
+      <valueType name="..."/>
+      <interfaceBlock name="..."/>
+      <associationBlock name="..."/>
+      <itemFlow name="..."/>
+      <blockDiagram name="..."/>
+      <internalBlockDiagram name="..."/>
+    </project>
+
+  Every element's "name" (or "id") becomes the last path segment of its
+  OSLC resource URI: <base>/services/<projectId>/<typePath>/<name>.
+-->
+<SysML>
+  <project id="SUV_Example">
+    <model name="SUV_Example"/>
+
+    <block name="Wheel">
+      <fullPort name="wheelFlange"/>
+      <proxyPort name="wheelAxle"/>
+    </block>
+
+    <block name="Chassis">
+      <partProperty name="frame"/>
+    </block>
+
+    <block name="Vehicle">
+      <partProperty name="engine"/>
+      <valueProperty name="mass"/>
+      <referenceProperty name="color"/>
+      <flowProperty name="fuelFlowProperty"/>
+      <port name="powerPort"/>
+      <proxyPort name="diagnosticPort"/>
+      <fullPort name="drivePort"/>
+      <connector name="driveConnector"/>
+      <connectorEnd name="driveConnectorEnd"/>
+      <nestedBlock name="subAssembly"/>
+      <internalBlockDiagram name="vehicleIBD"/>
+    </block>
+
+    <package name="Physical"/>
+    <requirement id="req1" name="Safety requirement"/>
+    <valueType name="Mass"/>
+    <interfaceBlock name="IFuel"/>
+    <associationBlock name="AWheel"/>
+    <itemFlow name="fuelFlow"/>
+    <blockDiagram name="vehicleBD"/>
+    <internalBlockDiagram name="topIBD"/>
+  </project>
+</SysML>

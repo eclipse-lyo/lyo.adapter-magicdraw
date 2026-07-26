@@ -20,22 +20,22 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import edu.gatech.mbsec.adapter.magicdraw.resources.Constants;
 import edu.gatech.mbsec.adapter.magicdraw.resources.SysMLAssociationBlock;
@@ -91,7 +91,7 @@ public class SysMLItemFlowService {
 			@QueryParam("oslc.pageSize") final String pageSize)
 			throws IOException, ServletException {
 		MagicDrawManager.loadSysMLProjects();
-		return MagicDrawManager.getItemFlows();
+		return MagicDrawManager.getItemFlows(projectId);
 	}
 
 	@GET
@@ -103,7 +103,7 @@ public class SysMLItemFlowService {
 			throws URISyntaxException {
 		MagicDrawManager.loadSysMLProjects();
 		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLItemFlow sysmlAssociationBlock = MagicDrawManager
-				.getItemFlowByQualifiedName(blockQualifiedName);
+				.getItemFlowByQualifiedName(projectId, blockQualifiedName);
 		return sysmlAssociationBlock;
 	}
 	
@@ -112,7 +112,7 @@ public class SysMLItemFlowService {
     public void getHtmlItemFlows(@PathParam("projectId") final String projectId)
     {				
 		MagicDrawManager.loadSysMLProjects();
-		List<SysMLItemFlow> sysmlItemFlowslocks = MagicDrawManager.getItemFlows();		
+		List<SysMLItemFlow> sysmlItemFlowslocks = MagicDrawManager.getItemFlows(projectId);
 		String requestURL = httpServletRequest.getRequestURL().toString();
     	if (sysmlItemFlowslocks !=null )
     	{	        
@@ -140,7 +140,7 @@ public class SysMLItemFlowService {
 			@QueryParam("oslc.prefix") final String prefix)
 			throws URISyntaxException, IOException {
 		MagicDrawManager.loadSysMLProjects();
-		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLItemFlow sysmlItemFlow = MagicDrawManager.getItemFlowByQualifiedName(blockQualifiedName);
+		edu.gatech.mbsec.adapter.magicdraw.resources.SysMLItemFlow sysmlItemFlow = MagicDrawManager.getItemFlowByQualifiedName(projectId, blockQualifiedName);
 	
 		String requestURL = httpServletRequest.getRequestURL().toString();
 		if (sysmlItemFlow !=null )
