@@ -34,7 +34,7 @@ import org.eclipse.lyo.oslc4j.provider.jena.JenaModelHelper;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.FileManager;
 
 import util.TriplestoreUtil;
@@ -67,8 +67,8 @@ public class GetVocabularyOfMagicDrawAdapterAndPushToStore {
 				
 				// create TDB dataset
 				String directory = TriplestoreUtil.getTriplestoreLocation();
-				Dataset dataset = TDBFactory.createDataset(directory);
-				Model tdbModel = dataset.getDefaultModel();
+				Dataset dataset = TDB2Factory.connectDataset(directory);
+				try {
 				try {
 					
 					HttpGet httpget = new HttpGet(vocabURI);
@@ -79,7 +79,14 @@ public class GetVocabularyOfMagicDrawAdapterAndPushToStore {
 		            if (entity != null) {		                
 		                InputStream inputStream = entity.getContent();
 		                model.read(inputStream, null);
-		                tdbModel.add(model);
+						dataset.executeWrite(() -> {
+							Model tdbModel = dataset.getDefaultModel();
+							try {
+								tdbModel.add(model);
+							} finally {
+								tdbModel.close();
+							}
+						});
 		            }
 
 				}  catch (IllegalArgumentException e) {
@@ -92,8 +99,9 @@ public class GetVocabularyOfMagicDrawAdapterAndPushToStore {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				tdbModel.close();
-				dataset.close();
+				} finally {
+					dataset.close();
+				}
 			}
 		};
 		thread.start();

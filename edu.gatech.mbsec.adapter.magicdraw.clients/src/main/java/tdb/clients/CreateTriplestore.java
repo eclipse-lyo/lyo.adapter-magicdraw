@@ -34,7 +34,7 @@ import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.FileManager;
 
 public class CreateTriplestore {
@@ -45,8 +45,12 @@ public class CreateTriplestore {
 				// create TDB dataset
 //				String directory = TriplestoreUtil.getTriplestoreLocation();
 				String directory = "C:\\Users\\Axel\\git\\edu.gatech.mbsec.adapter.tdb\\exampletriplestore";
-				Dataset dataset = TDBFactory.createDataset(directory);		
-				dataset.close();
+				Dataset dataset = TDB2Factory.connectDataset(directory);
+				try {
+					// Opening the dataset creates it when it does not already exist.
+				} finally {
+					dataset.close();
+				}
 			}
 		};
 		thread.start();

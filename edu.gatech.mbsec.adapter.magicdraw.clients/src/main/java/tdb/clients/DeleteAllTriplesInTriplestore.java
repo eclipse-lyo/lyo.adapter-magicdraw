@@ -28,11 +28,10 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.tdb.TDBFactory;
-import org.apache.jena.update.GraphStore;
+import org.apache.jena.tdb2.TDB2Factory;
+import org.apache.jena.update.UpdateExecution;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 import org.apache.jena.util.FileManager;
 
@@ -43,7 +42,8 @@ public class DeleteAllTriplesInTriplestore {
 			public void start() {
 				// load model from triplestore
 				String directory = TriplestoreUtil.getTriplestoreLocation();
-				Dataset dataset = TDBFactory.createDataset(directory);
+				Dataset dataset = TDB2Factory.connectDataset(directory);
+				try {
 				
 				// Create a query
 				String queryString = 
@@ -55,10 +55,13 @@ public class DeleteAllTriplesInTriplestore {
 				UpdateRequest query = UpdateFactory.create(queryString);
 
 				// Execute the query and obtain results
-				UpdateProcessor qe = UpdateExecutionFactory.create(query, (GraphStore) dataset.asDatasetGraph());
-				qe.execute();
-
-				dataset.close();
+				dataset.executeWrite(() -> {
+					UpdateExecution qe = UpdateExecutionFactory.create(query, dataset);
+					qe.execute();
+				});
+				} finally {
+					dataset.close();
+				}
 			}
 		};
 		thread.start();

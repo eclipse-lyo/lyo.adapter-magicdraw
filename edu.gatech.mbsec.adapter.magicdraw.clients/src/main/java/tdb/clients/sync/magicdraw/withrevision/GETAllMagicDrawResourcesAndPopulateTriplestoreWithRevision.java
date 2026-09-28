@@ -56,7 +56,7 @@ import util.TriplestoreUtil;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.FileManager;
 
 public class GETAllMagicDrawResourcesAndPopulateTriplestoreWithRevision {
@@ -70,7 +70,8 @@ public class GETAllMagicDrawResourcesAndPopulateTriplestoreWithRevision {
 			public void start() {
 				// create TDB dataset
 				String directory = TriplestoreUtil.getTriplestoreLocation();
-				Dataset dataset = TDBFactory.createDataset(directory);
+				Dataset dataset = TDB2Factory.connectDataset(directory);
+				try {
 
 				
 				String baseHTTPURI = "http://localhost:" + MagicDrawAdapterAndTDBSubversionSyncClientWithRevision.port + "/oslc4jmagicdraw";
@@ -156,10 +157,21 @@ public class GETAllMagicDrawResourcesAndPopulateTriplestoreWithRevision {
 				Object[] objects = oslcResourcesArrayList.toArray();
 
 				Model model;
-				Model tdbModel = dataset.getDefaultModel();
 				try {
 					model = JenaModelHelper.createJenaModel(objects);
-					tdbModel.add(model);
+					final Model modelToAdd = model;
+					try {
+						dataset.executeWrite(() -> {
+							Model tdbModel = dataset.getDefaultModel();
+							try {
+								tdbModel.add(modelToAdd);
+							} finally {
+								tdbModel.close();
+							}
+						});
+					} finally {
+						model.close();
+					}
 				} catch (IllegalAccessException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -176,8 +188,9 @@ public class GETAllMagicDrawResourcesAndPopulateTriplestoreWithRevision {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				tdbModel.close();
-				dataset.close();
+				} finally {
+					dataset.close();
+				}
 			}
 		};
 		thread.start();
