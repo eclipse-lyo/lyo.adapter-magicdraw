@@ -5,7 +5,7 @@ standalone XML repository for development, demonstrations, and tests, or with
 the optional MagicDraw Java API repository when the proprietary SDK is
 available.
 
-The project currently targets Eclipse Lyo `7.0.0.Beta1` and Jakarta REST.
+The project currently targets Eclipse Lyo `7.0.0.Beta3` and Jakarta REST.
 
 ## Getting started
 

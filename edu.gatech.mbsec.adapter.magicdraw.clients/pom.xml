@@ -8,7 +8,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.lyo>7.0.0.Beta1</version.lyo>
+		<version.lyo>7.0.0.Beta3</version.lyo>
 	</properties>
 
 	<dependencyManagement>
