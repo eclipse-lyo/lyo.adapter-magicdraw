@@ -1,9 +1,9 @@
 # MagicDraw SysML v2 API probe
 
-This standalone Java 21 test project records the API surface shipped with the
-local Magic Systems of Systems Architect installation. It does not start the
-application, open a model, or require a MagicDraw license. SysML v2 tests are
-skipped when no installation path is supplied.
+This Java 21 test project records the API surface shipped with the local Magic
+Systems of Systems Architect installation. Maven tests inspect the installed
+bundles without starting the application. SysML v2 bundle tests are skipped
+when no installation path is supplied.
 
 Run the Lyo Beta3 check on any machine:
 
@@ -20,5 +20,36 @@ mvn -f experiments/magicdraw-sysml-v2-api-probe/pom.xml test `
 
 The tests inspect the SysML v2 plugin descriptor and model JARs, load generated
 SysML v2/KerML interfaces in an isolated class loader, and print their public
-method signatures. The installed-bundle checks are diagnostics for this
-2026x Refresh 1 payload, not an assertion that the plugin is active in the UI.
+method signatures. Standalone EMF object creation is skipped when the installed
+model needs the application's EsiConfig service.
+
+## Application-hosted project tests
+
+On the installed Windows workstation, run:
+
+```powershell
+experiments/magicdraw-sysml-v2-api-probe/run-magicdraw-transaction-probe.ps1
+```
+
+The script uses the bundled application Java runtime and a copy of the bundled
+class-diagram sample. It launches the product runtime through
+`ProjectCommandLine`, opens the sample, closes a session containing one package
+edit, and cancels a second session. In the Community installation tested here,
+the bundled UML sample reports `Project.isEditable() == false`; the edits pass
+their in-memory assertions but the sample copy cannot be saved.
+
+The script also creates a disposable native SysML v2 project from the installed
+SysML v2 template. It creates a `RequirementUsage` with the installed generated
+factory, adds it to a writable `EsiResource`, verifies `reset()` rolls back an
+uncommitted object, commits a second requirement through the ESI resource API,
+closes and reopens the project through `SysMLProjectHelper`, then verifies the
+committed requirement survived. The disposable repository project is deleted
+after verification. The script checks the application log for success markers;
+the product redirects command-line application output to `msosa.log`.
+
+The product's sample model and SysML v2 template are never edited. The UML
+sample copy and application probe classes stay under `target/`. The native
+SysML v2 test project is created in the installed local Teamwork Cloud service
+and removed after the reopen check. The probe deliberately uses the host's ESI
+resource API: the SysML v2 EMF collections are ESI-managed and ordinary detached
+EMF/XMI persistence is not a valid substitute for a native project transaction.

@@ -157,3 +157,101 @@ mvn -B clean test -DskipITs
 0 failures, 0 errors, 0 skipped. The optional proprietary MagicDraw repository
 module was not part of this standalone reactor test. No MagicDraw process or
 authoring integration test was run.
+
+### 7.7 Installed-application runtime verification — 2026-09-29
+
+This section supersedes the final sentence of 7.6: after that API-only review,
+the installed product runtime was launched and the checks below were run. The
+application process used the product's bundled Java runtime and
+`ProjectCommandLine`; this exercised the loaded application/plugin runtime but
+did not automate the visible desktop UI.
+
+#### Startup and model loading
+
+- Launched the 2026x Refresh1 product runtime with the installed plugin tree and
+  application configuration. The runtime initialized its Swing/AWT and plugin
+  services and shut down normally.
+- Opened the bundled class-diagram sample as a disposable `.mdzip` copy. The
+  application log recorded `ProjectLoadService DONE` for the copied file; a
+  separate run of the product's `imagegenerator.exe` loaded the same sample and
+  exported four SVG diagrams. The installed SysML v1 and SysML v2 plugins were
+  present in the runtime.
+- Created a native SysML v2 project from the installed SysML v2 template using
+  `SysMLProjectHelper.createUPSProject`. It was editable, had an
+  `EsiProjectDescriptor`, and had no UML `primaryModel`. Its `IPrimaryProject`
+  exposed an `EsiResourceSet` with writable ESI resources.
+
+#### Editing and transaction behavior
+
+- The application class loader successfully initialized
+  `SysMLPackage.eINSTANCE` and `SysMLFactory.eINSTANCE`, created a generated
+  `RequirementUsage`, and round-tripped `reqId` through `setReqId`/`getReqId`.
+  The generated `getText()` collection was an unmodifiable Ecore list on this
+  detached object; the probe did not claim that direct list mutation works.
+- On the disposable UML sample copy, the adapter-style `SessionManager`
+  transaction probe created a package, closed the session, then created a
+  second package and cancelled that session. Both in-memory assertions passed.
+  `Project.isEditable()` was false in this Community installation, so the UML
+  copy could not be saved and that test does not establish persistent UML save
+  behavior.
+- On the native SysML v2 project, the probe attached a `RequirementUsage` to a
+  writable `EsiResource`. `EsiResource.reset()` removed the uncommitted object.
+  A second requirement was committed with `EsiResource.createCommitter().commit`;
+  the ESI log recorded a successful resource commit and advanced the client
+  revision from 1 to 2.
+- The native SysML v2 project was closed and reopened via
+  `SysMLProjectHelper.loadUPSProject`. The committed requirement ID was found
+  in the reopened ESI resource. The disposable server project was then deleted
+  successfully.
+
+#### Limits and code implications
+
+- Runtime verification establishes the project/resource and transaction path
+  for the installed SysML v2 plugin. It does not validate visible editor UI
+  workflows, semantic placement of a requirement under an authored Namespace,
+  or the adapter's complete OSLC mapping against a user-authored model.
+- The native SysML v2 project's lack of a UML `primaryModel` confirms that
+  `SessionManager`/UML traversal cannot be the v2 backend. The adapter needs to
+  resolve ESI resources from the active `IPrimaryProject`, traverse generated
+  SysML/KerML EObjects, and use ESI transaction/commit APIs for persistence.
+- `experiments/magicdraw-sysml-v2-api-probe/run-magicdraw-transaction-probe.ps1`
+  is retained as the repeatable host-runtime harness. Its log assertions
+  distinguish the Community read-only UML sample from the successful native
+  SysML v2 commit/reopen path.
+
+### 7.8 Repeatability and build results — 2026-09-29
+
+The corrected host-runtime harness completed with exit code 0. Its latest
+`msosa.log` markers record the generated API check, ESI rollback, ESI commit,
+project close/reopen verification, successful disposable-project deletion,
+and `fileSaved=false` for the read-only UML sample copy.
+
+The probe project tests were rerun against the installed product path:
+
+```powershell
+mvn -B -f experiments/magicdraw-sysml-v2-api-probe/pom.xml test `
+  "-Dmagicdraw.home=C:\Program Files\Magic Systems of Systems Architect"
+```
+
+**Passed:** 4 test invocations, 0 failures, 0 errors, 1 skipped. The skipped
+case requires the product's ESI runtime service and is exercised by the
+application-hosted harness instead. The Lyo Beta3 `Link` test and installed
+bundle/API surface tests passed.
+
+```powershell
+mvn -B clean test -DskipITs
+```
+
+**Passed:** all five default reactor modules; 7 tests, 0 failures, 0 errors,
+0 skipped.
+
+An additional attempt to build the optional MagicDraw repository/distribution
+modules against this installation (`mvn -B -Pnon-standalone
+-Dmagicdraw.installdir="C:\Program Files\Magic Systems of Systems Architect"
+test -DskipITs`) stopped during Maven dependency resolution. That module's POM
+expects the legacy fixed names `lib/md_api.jar`, `lib/md_common_api.jar`,
+`lib/uml2.jar`, and `plugins/com.nomagic.magicdraw.sysml/sysml_api.jar`; none
+exist at those paths in the 2026x Refresh1 layout. Maven therefore did not
+compile or run tests for the adapter's MagicDraw repository module. The
+application-hosted probe used the product's actual versioned runtime JARs and
+verified the SysML v2 ESI APIs directly.
