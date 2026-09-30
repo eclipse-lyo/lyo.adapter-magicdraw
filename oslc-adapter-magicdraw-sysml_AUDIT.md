@@ -255,3 +255,178 @@ exist at those paths in the 2026x Refresh1 layout. Maven therefore did not
 compile or run tests for the adapter's MagicDraw repository module. The
 application-hosted probe used the product's actual versioned runtime JARs and
 verified the SysML v2 ESI APIs directly.
+
+### 7.9 2026 Community Edition: SysML v1 .mdzip assessment — 2026-09-30
+
+#### Scope and verified input
+
+This assessment is specifically about continuing the adapter's existing
+SysML v1/UML behavior on the installed Magic Systems of Systems Architect
+2026x Refresh1 Community Edition. It does not propose replacing the v1 model
+with SysML v2. The product build in this installation is
+2026.1.0-42-b71a9669.
+
+The earlier class-diagram test established that this runtime can load the
+generic UML .mdzip format. It did not establish that a real SysML v1 model or
+the adapter's SysML v1 mapping works. To close that gap, the retained
+application-hosted probe now opens a disposable copy of the installed
+samples/SysML v1/Introduction to SysML v1.mdzip using ProjectCommandLine.
+The product log records ProjectLoadService DONE. A traversal through the
+loaded model found 14,838 owned elements and 54 diagrams. It found these
+SysML v1 stereotype counts:
+
+| SysML v1 stereotype | Count |
+|---|---:|
+| Block | 131 |
+| Requirement | 35 |
+| InterfaceBlock | 10 |
+| ValueType | 59 |
+| PartProperty | 46 |
+| ReferenceProperty | 47 |
+| ValueProperty | 65 |
+| FlowProperty | 20 |
+| ItemFlow | 2 |
+| ProxyPort | 13 |
+| FullPort | 10 |
+| AssociationBlock | 0 |
+
+This confirms that the 2026 product can load and expose a substantial real
+SysML v1 .mdzip model, including its SysML profile and attached model
+libraries. The probe is deliberately read-only and calls the product model
+API directly; it does not instantiate or exercise
+SysmlRepositoryMagicDrawImpl. Therefore adapter resource counts, OSLC
+serialization, diagram image export for this model, and write operations
+remain to be verified after the repository implementation compiles.
+
+#### Compile compatibility findings
+
+A compile-only check used the current repository sources, the installed 2026
+runtime JARs, and the already-built adapter API/resource modules. The existing
+MagicDraw repository source produced 30 Java compile errors. All 30 cluster
+into three removed or changed API families:
+
+| API difference | Compile failures | Existing adapter use | 2026 direction |
+|---|---:|---|---|
+| SysMLConstants fields such as SYSML_PROFILE, REQUIREMENT_STEREOTYPE, BLOCK_STEREOTYPE, VALUE_TYPE_STEREOTYPE, and VALUE_TYPE_UNIT_TAG are no longer exposed by the 2026 SysMLConstants class. | 10 | ValueType reads and Requirement, Block, and InterfaceBlock creation. | Resolve stereotypes from the project by name through StereotypesHelper, or centralize the stable SysML v1 profile, stereotype, and tag names in adapter-owned constants. Verify profile lookup on real v1 models. |
+| Element.getAppliedStereotypeInstance() has been removed. The 2026 UML Element exposes getAppliedStereotype() and hasAppliedStereotype(). | 18 | Flow, value, reference, and part property mapping; linked-stereotype filtering; directed relationship classification. | Use getAppliedStereotype() or StereotypesHelper.hasStereotype for type checks, and StereotypesHelper.getStereotypePropertyFirst for tags. Preserve behavior when multiple stereotypes are applied instead of assuming classifier zero is the only one. |
+| ModelHelper.getElementsOfType(Model, Class[], boolean, boolean) is absent from the 2026 ModelHelper. | 2 | Association Block and Information Flow discovery. | Replace the two calls with a traversal over Element.getOwnedElement(), or a supported 2026 query API. The existing implementation already contains recursive package/class traversal that can inform this change. |
+
+The failed compile was against the product JARs, not just the currently
+incorrect Maven file paths, so fixing systemPath values alone will not make the
+old repository source compile. Conversely, the check did not find compile
+breaks in the Project/Application load calls, ProjectsManager,
+ProjectDescriptor, SessionManager, ModelElementsManager, ImageExporter, core
+UML Element/Model types, or their common diagram and factory calls. The
+product's 2026 class layout moves these APIs into versioned JARs: for example,
+Application, Project, ProjectsManager, SessionManager, and ImageExporter are
+in lib/core-2026.1.0-42-b71a9669.jar, while UML model interfaces and
+ElementsFactory are in lib/com.nomagic.magicdraw.uml2-2026.1.0-42-b71a9669.jar.
+The 2026 SysML v1 constants class is in
+plugins/com.nomagic.requirements/lib/com.nomagic.magicdraw.sysml-2026.1.0-42-b71a9669.jar;
+the old Maven dependency path under plugins/com.nomagic.magicdraw.sysml/sysml_api.jar
+does not exist.
+
+#### Functionality that must remain covered
+
+The current repository backend is one 4,376-line SysML v1/UML implementation.
+Its read mapping covers the model and packages; Blocks and their part,
+reference, and value properties; ValueTypes and units; Requirements and their
+relations; InterfaceBlocks and FlowProperties; AssociationBlocks; ItemFlows;
+connectors, connector ends, ports, and proxy/full ports; and SysML Block
+Definition and Internal Block diagrams. It also exports diagram images while
+loading/mapping a project. This mapping is based on UML metaclasses,
+SysML v1 stereotypes, and MagicDraw-specific presentation APIs; it is not a
+generic SysML v2 model traversal.
+
+The backend also implements OSLC-triggered creation or update for packages,
+blocks, requirements, item flows, reference/part/value/flow properties,
+connectors and connector ends, ports, and interface blocks. Those operations
+create UML elements, apply SysML v1 stereotypes, run a MagicDraw session, and
+save the .mdzip. Read compatibility alone is not enough to claim that this
+write behavior works in Community Edition.
+
+The earlier transaction probe found Project.isEditable() false for a copy of
+the installed UML sample, even though the copied file itself was not marked
+read-only by Windows. Its session commit/cancel checks were in-memory only;
+the sample was not saved. This is evidence about that loaded sample and
+runtime, not proof that every Community Edition project is read-only. A
+user-authored writable SysML v1 project must be used to determine whether the
+Community Edition permits the adapter's save operations. If the product
+reports that project as non-editable, full parity for OSLC writes is blocked
+by the edition or project permission and the 2026 backend must reject writes
+clearly instead of returning success.
+
+#### Version switch design
+
+The repository already has a version-neutral SysmlRepository interface and
+MagicDrawManager already instantiates the implementation named by the
+sysml.repository.class configuration property. This is the right seam for
+preserving old support. Keep the existing SysmlRepositoryMagicDrawImpl source
+and its legacy SDK profiles intact; add a separately compiled 2026
+implementation/module that also implements SysmlRepository. Select the
+implementation and installation with a 2026 Maven profile and the existing
+sysml.repository.class setting. The existing Lyo resources and OSLC service
+surface can remain shared.
+
+Build one MagicDraw version per adapter distribution. Although much of the
+2026 public API keeps the same package and type names, the old and new
+proprietary binaries are not safe to mix in one application classloader.
+This is a build/deployment switch, not a hot switch inside one running
+process. A 2026 Community launch would configure the new implementation class;
+an existing 17.x/18.x deployment would continue to configure the old class.
+
+The distribution profile needs a 2026 installation-aware classpath and runtime
+layout. The current repository POM expects md_api.jar, md_common_api.jar,
+uml2.jar, and sysml_api.jar at old fixed paths. The current distribution WAR
+copies root lib JARs and the SysML plugin's main JAR but not the separate
+requirements plugin library that now contains SysML v1 API constants. The
+SysML v1 plugin descriptor also declares dependencies on other product
+plugins. Build and runtime packaging must therefore either use the installed
+product/plugin runtime with its plugin directory and launch configuration, or
+preserve and include the required versioned plugin dependencies and
+configuration. Merely copying four replacement JARs into the current WAR
+would not establish a runnable 2026 installation.
+
+#### Recommended implementation and acceptance sequence
+
+1. Add a 2026 profile/module with the installed SDK layout and compile a
+   separate SysML v1 backend. Keep the existing 17.x/18.x source and profiles
+   unchanged.
+2. Adapt the three compile-error families above. Keep these compatibility
+   decisions behind the 2026 backend initially; factor shared code only after
+   both old and new profiles compile and behavior is compared.
+3. Run the new backend on a copy of the real SysML v1 sample and compare the
+   OSLC model/resource counts and relationship links with the current backend
+   on a supported legacy installation. Check that all 54 diagrams are
+   discoverable and that intended images are exported.
+4. Test each supported OSLC mutation on a disposable editable .mdzip: mutate,
+   commit the session, save, close, reopen, and verify persistence. Also test
+   cancel/exception rollback. If Community Edition does not permit saving,
+   document the 2026 Community mode as read-only and keep write support for
+   the legacy authoring products.
+5. Build and run the selected distribution with the configured repository
+   class, then smoke-test the OSLC service-provider and resource endpoints.
+
+The retained probe source and runner are
+experiments/magicdraw-sysml-v2-api-probe/src/magicdraw/java/edu/gatech/mbsec/adapter/magicdraw/probe/MagicDrawSysmlV1ModelReadProbe.java
+and
+experiments/magicdraw-sysml-v2-api-probe/run-magicdraw-sysml-v1-read-probe.ps1.
+The sample is copied beneath the experiment project's target directory before
+loading. The runner completed successfully on 2026-09-30 and recorded the
+counts above in the installed product log.
+
+### 7.10 Verification for the mdzip assessment — 2026-09-30
+
+- The SysML v1 application-hosted read probe completed with exit code 0.
+  ProjectLoadService DONE was logged for the copied sample; the traversal
+  recorded 14,838 model elements, 54 diagrams, and the stereotype counts in
+  section 7.9. The installed sample and its target copy have identical SHA-256
+  hashes after the read-only run.
+- The retained Maven probe project was rerun with the installed product path:
+  BUILD SUCCESS, 4 tests, 0 failures, 0 errors, 1 skipped. The skipped
+  invocation requires the running ESI application service and is covered by
+  the separate application-hosted SysML v2 transaction probe.
+- The source compatibility check is intentionally not counted as a passing
+  build: javac exited 1 with the 30 compile errors detailed in section 7.9.
+  The default five-module reactor build was not rerun because this assessment
+  changed no production Java sources.

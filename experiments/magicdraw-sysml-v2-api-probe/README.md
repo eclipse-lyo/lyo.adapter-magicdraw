@@ -1,4 +1,4 @@
-# MagicDraw SysML v2 API probe
+# MagicDraw SysML API and runtime probes
 
 This Java 21 test project records the API surface shipped with the local Magic
 Systems of Systems Architect installation. Maven tests inspect the installed
@@ -47,8 +47,17 @@ committed requirement survived. The disposable repository project is deleted
 after verification. The script checks the application log for success markers;
 the product redirects command-line application output to `msosa.log`.
 
-The product's sample model and SysML v2 template are never edited. The UML
-sample copy and application probe classes stay under `target/`. The native
+To open an actual SysML v1 sample and count its v1 elements and diagrams, run:
+
+    experiments/magicdraw-sysml-v2-api-probe/run-magicdraw-sysml-v1-read-probe.ps1
+
+This read-only probe uses a copy of the installed “Introduction to SysML v1”
+sample and records recognized SysML v1 stereotype counts in the application
+log. It verifies product-level sample loading and traversal; it does not invoke
+the OSLC adapter repository implementation.
+
+The product's sample models and SysML v2 template are never edited. The UML
+and SysML v1 sample copies and application probe classes stay under `target/`. The native
 SysML v2 test project is created in the installed local Teamwork Cloud service
 and removed after the reopen check. The probe deliberately uses the host's ESI
 resource API: the SysML v2 EMF collections are ESI-managed and ordinary detached
