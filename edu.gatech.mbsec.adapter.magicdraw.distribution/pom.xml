@@ -24,7 +24,7 @@
 		</dependency>
 		<dependency>
 			<groupId>edu.gatech.mbsec.adapter.magicdraw</groupId>
-			<artifactId>oslc4j-magicdraw-repo-magicdraw</artifactId>
+			<artifactId>${magicdraw.repository.artifactId}</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<!-- Preserve the security fix made in the archived version POMs. -->
@@ -64,20 +64,6 @@
 							</excludes>
 						</resource>
 						<resource>
-							<directory>${magicdraw.installdir}/lib/graphics</directory>
-							<targetPath>WEB-INF/lib</targetPath>
-							<includes>
-								<include>*.jar</include>
-							</includes>
-						</resource>
-						<resource>
-							<directory>${magicdraw.installdir}/lib/webservice</directory>
-							<targetPath>WEB-INF/lib</targetPath>
-							<includes>
-								<include>*.jar</include>
-							</includes>
-						</resource>
-						<resource>
 							<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.sysml</directory>
 							<targetPath>WEB-INF/lib</targetPath>
 							<includes>
@@ -104,6 +90,129 @@
 	</build>
 
 	<profiles>
+		<profile>
+			<id>legacy-magicdraw-runtime-jars</id>
+			<activation><activeByDefault>true</activeByDefault></activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<webResources combine.children="append">
+								<resource>
+									<directory>${magicdraw.installdir}/lib/graphics</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/lib/webservice</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+							</webResources>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>magicdraw-2026x-r1-community</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<webResources combine.children="append">
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.sysml/lib</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<!-- SysML v1 API classes/constants moved into the Requirements plugin. -->
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.requirements/lib</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<!-- SysML v1 plugin dependencies needed while loading .mdzip projects. -->
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.ganttchartdiagram</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.migration</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.imagelibrary</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.informationflows</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.dialogtable</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.diagramtable</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.dependencymatrix</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.fileattachments</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.importexport</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.legend</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.glossary</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.relationshipmap</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.suspect</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/plugins/com.nomagic.requirements</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+							</webResources>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<!-- MagicDraw 17.0.3 SP1 was the only archived POM that required
 		     runtime JARs outside lib/* and the SysML plugin. -->
 		<profile>
@@ -115,6 +224,16 @@
 						<artifactId>maven-war-plugin</artifactId>
 						<configuration>
 							<webResources combine.children="append">
+								<resource>
+									<directory>${magicdraw.installdir}/lib/graphics</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
+								<resource>
+									<directory>${magicdraw.installdir}/lib/webservice</directory>
+									<targetPath>WEB-INF/lib</targetPath>
+									<includes><include>*.jar</include></includes>
+								</resource>
 								<resource>
 									<directory>${magicdraw.installdir}/plugins/com.nomagic.magicdraw.dependencymatrix</directory>
 									<targetPath>WEB-INF/lib</targetPath>

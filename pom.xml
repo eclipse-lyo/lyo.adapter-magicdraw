@@ -20,6 +20,7 @@
 		     concrete version profile overrides it when building a legacy
 		     MagicDraw distribution. -->
 		<magicdraw.version>17.x</magicdraw.version>
+		<magicdraw.repository.artifactId>oslc4j-magicdraw-repo-magicdraw</magicdraw.repository.artifactId>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
@@ -161,6 +162,18 @@
 			</properties>
 			<modules>
 				<module>edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw</module>
+				<module>edu.gatech.mbsec.adapter.magicdraw.distribution</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>magicdraw-2026x-r1-community</id>
+			<properties>
+				<magicdraw.version>2026.1.0-42-b71a9669</magicdraw.version>
+				<magicdraw.installdir>C:/Program Files/Magic Systems of Systems Architect</magicdraw.installdir>
+				<magicdraw.repository.artifactId>oslc4j-magicdraw-repo-magicdraw-2026</magicdraw.repository.artifactId>
+			</properties>
+			<modules>
+				<module>edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw-2026</module>
 				<module>edu.gatech.mbsec.adapter.magicdraw.distribution</module>
 			</modules>
 		</profile>

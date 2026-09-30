@@ -435,3 +435,69 @@ counts above in the installed product log.
   build: javac exited 1 with the 30 compile errors detailed in section 7.9.
   The default five-module reactor build was not rerun because this assessment
   changed no production Java sources.
+
+### 7.11 Separate 2026 backend implementation — 2026-09-30
+
+The version switch now keeps the existing `repo-magicdraw` implementation and
+adds `edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw-2026`. Both implement
+the shared `SysmlRepository` interface and continue to publish the shared OSLC
+resource classes. `MagicDrawManager` already constructs the configured
+implementation through `sysml.repository.class`, so no service or resource
+class fork was needed.
+
+The `magicdraw-2026x-r1-community` Maven profile selects SDK version
+`2026.1.0-42-b71a9669`, the installed Community directory, the new repository
+artifact, and a matching distribution runtime classpath. The distribution WAR
+contains the 2026 repository JAR and 2026 SysML/Requirements runtime JARs; it
+does not contain the legacy repository JAR. The runtime still needs
+`sysml.repository.class=edu.gatech.mbsec.adapter.magicdraw.repository.SysmlRepositoryMagicDraw2026Impl`
+to select the new implementation. The README now shows the matching launch
+command.
+
+The compatibility changes are isolated to the 2026 module: SysML profile
+constants are defined locally because the old constants class is gone;
+stereotype access uses the 2026 `Element` APIs; recursive collection uses
+owned elements because the old `ModelHelper.getElementsOfType` overloads were
+removed; URI path identifiers percent-encode spaces, literal percent signs,
+and UTF-8 characters; and optional untyped properties no longer abort the
+entire map. Diagram image and mapping-log output paths can be configured for
+the selected runtime.
+
+The backend exposes `loadSysMLProjectFromLoadedProject(projectId, project)`
+for product hosts that already loaded a project. It shares the regular mapping
+pipeline but avoids calling `Application.start()` a second time. The retained
+probe uses MagicDraw's `ProjectCommandLine` host, not a plain Java main, to
+exercise this entry point.
+
+### 7.12 2026 Community backend verification — 2026-09-30
+
+- `experiments/magicdraw-sysml-v2-api-probe/run-magicdraw-sysml-v1-backend-probe.ps1`
+  copied the installed `Introduction to SysML v1.mdzip` to the experiment
+  target and launched the backend inside the installed 2026x Refresh1 product
+  host. The repository returned success with 1 model, 122 blocks, 35
+  requirements, 10 interface blocks, 47 value types, 43 part properties, 41
+  reference properties, 42 value properties, 14 flow properties, 1 item flow,
+  13 proxy ports, 10 full ports, 23 Block Definition diagrams, and 5 Internal
+  Block diagrams.
+- The probe asserted that the project, model, blocks, and both diagram types
+  were mapped. It canceled its temporary MagicDraw session and did not save or
+  alter the installed sample. It exported diagram images and the mapping log
+  under the ignored experiment `target` directory; no writes were directed to
+  the product installation. The installed sample and disposable copy retained
+  the same SHA-256 hash (`B08E325691D0BFC05650FC57E13D7917B9D778847A162751C818AA911BBC15C5`).
+- `mvn -B test -DskipITs` passed: 7 tests, 0 failures, 0 errors, 0 skipped.
+- `mvn -B -Pmagicdraw-2026x-r1-community -pl edu.gatech.mbsec.adapter.magicdraw.distribution -am -DskipTests package`
+  passed. The resulting WAR inspection confirmed that the 2026 repository JAR
+  is present and the legacy repository JAR is absent.
+- This validates SysML v1 model loading and OSLC repository mapping inside the
+  installed Community host. It does not validate the assembled WAR as a live
+  HTTP service, or OSLC-driven edit/save/reopen behavior. The earlier
+  transaction probe found the installed sample was not editable, so mutation
+  persistence still needs a user-authored writable `.mdzip` before claiming
+  Community write support.
+
+The two diagram image directories use diagram names as filenames, matching the
+existing behavior. In this sample, multiple diagrams share a name, so later
+exports overwrite earlier images in the flat directories even though all 23
+Block Definition and 5 Internal Block diagrams were mapped. The OSLC diagram
+resource counts above are unaffected.
