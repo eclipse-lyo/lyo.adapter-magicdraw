@@ -24,6 +24,14 @@
       <artifactId>oslc4j-magicdraw-resources</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>edu.gatech.mbsec.adapter.magicdraw</groupId>
+      <artifactId>oslc4jmagicdraw</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+      <classifier>classes</classifier>
+      <scope>test</scope>
+    </dependency>
     <!-- These proprietary SDK JARs come from the local 2026 product install. -->
     <dependency>
       <groupId>com.nomagic.magicdraw</groupId>
@@ -112,6 +120,12 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-servlet</artifactId>
+      <version>${version.jetty}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

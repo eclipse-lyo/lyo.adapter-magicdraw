@@ -549,3 +549,50 @@ The first harness run initially failed because the product redirects
 `System.out` to its own application log, rather than Maven's process stream.
 The integration test was changed to assert a success result file created by
 the probe after mapping assertions. The rerun then passed as reported above.
+
+### 7.14 Read-only HTTP integration with the 2026 backend — 2026-09-30
+
+The product-hosted integration test now exercises the adapter's actual JAX-RS
+resources with the 2026 repository implementation active. Inside the 2026
+Community process, the probe installs the mapped repository in
+`MagicDrawManager`, points the application base URI at an ephemeral localhost
+port, and starts the adapter application in embedded Jetty. Failsafe then
+performs four HTTP `GET` requests and parses their RDF/XML responses:
+
+1. the service provider catalog singleton;
+2. the provider for `Introduction to SysML v1`;
+3. that provider's blocks query capability; and
+4. one block resource returned by the query.
+
+No modifying HTTP methods are issued. The test opens a disposable model copy,
+checks the installed sample and the copy have the same SHA-256 before and
+after, and cancels the product session without saving. The host test completed
+without skipping integration tests:
+
+```text
+mvn -B -Pmagicdraw-2026x-r1-community -pl :oslc4j-magicdraw-repo-magicdraw-2026 -am verify
+```
+
+Failsafe reported 1 test, 0 failures, 0 errors, and 0 skipped. The result
+contained the previously recorded mapping counts and confirmed four successful
+GETs. The first live catalog request exposed invalid URI construction when a
+project name contained spaces. Service-provider IDs are now encoded as single
+URI path segments at registration, and the test confirms the catalog,
+provider, query, and block links resolve successfully.
+
+The change also scopes the Maven Jetty start/stop executions to the `acceptance`
+profile. This keeps the standalone HTTP acceptance server out of the product
+hosted reactor, where the test starts its own in-process Jetty server on a
+dynamic port. The standalone acceptance suite is run separately and remains
+the check for the fixture backend; the product-hosted test exercises the 2026
+backend through the same read-only routes.
+
+Validation after the HTTP integration change:
+
+```text
+mvn -B -Pacceptance verify
+```
+
+The standalone run completed successfully: 7 Surefire tests and 4 Failsafe
+HTTP tests, 0 failures, 0 errors, and 0 skipped. The Jetty start/stop executions
+ran under `acceptance`, and the server shut down cleanly after the HTTP tests.

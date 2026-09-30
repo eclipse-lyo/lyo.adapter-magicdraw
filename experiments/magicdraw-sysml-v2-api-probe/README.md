@@ -29,13 +29,19 @@ The reactor has a product-hosted Failsafe integration test for the selectable
 SysML v1 repository backend. Run it with the installed 2026 Community edition:
 
 ```powershell
-mvn -B -Pmagicdraw-2026x-r1-community verify
+mvn -B -Pmagicdraw-2026x-r1-community `
+  -pl :oslc4j-magicdraw-repo-magicdraw-2026 -am verify
 ```
 
 This `verify` run does not set `skipITs`. Failsafe launches the installation's
 bundled Java runtime, opens a disposable copy of the installed SysML v1 sample,
-and asserts the 2026 backend maps models, blocks, and both diagram types. The
-test writes its mapping result and product console log under
+and asserts the 2026 backend maps models, blocks, and both diagram types. It
+then starts the adapter's JAX-RS application with that repository in an
+embedded Jetty server on an ephemeral port. The test performs read-only GETs
+against the catalog, service provider, blocks query, and one block resource.
+It does not call any create, update, or delete route, and checks that the
+installed sample and disposable model copy retain their original SHA-256
+hashes. The test writes its mapping result and product log under
 `edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw-2026/target/magicdraw-2026-it`.
 Override the installation selected by the profile with
 `-Dmagicdraw.installdir="C:\\path\\to\\Magic Systems of Systems Architect"`.
@@ -48,8 +54,9 @@ mvn -B -Pacceptance verify
 ```
 
 They exercise the catalog, service provider, query capability, block query, and
-individual block resource over HTTP. The product-hosted backend test verifies
-the 2026 SDK and repository mapping; it does not start the web server.
+individual block resource over HTTP using the standalone repository fixture.
+The product-hosted test also exercises the same GET routes with the 2026
+repository implementation inside the product process.
 
 ### Manual runtime probes
 
