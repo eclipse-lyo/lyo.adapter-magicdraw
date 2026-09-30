@@ -55,6 +55,8 @@ This read-only probe uses a copy of the installed “Introduction to SysML v1”
 sample and records recognized SysML v1 stereotype counts in the application
 log. It verifies product-level sample loading and traversal; it does not invoke
 the OSLC adapter repository implementation.
+The product log did warn about one unresolved external module reference, so
+the probe does not establish complete resolution of all model dependencies.
 
 The product's sample models and SysML v2 template are never edited. The UML
 and SysML v1 sample copies and application probe classes stay under `target/`. The native

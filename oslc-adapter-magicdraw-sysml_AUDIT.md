@@ -290,6 +290,11 @@ SysML v1 stereotype counts:
 | FullPort | 10 |
 | AssociationBlock | 0 |
 
+The product log also warned that the sample references a missing external
+module named SysML1.3 Interfaces Modeling.mdzip. Loading still completed and
+the traversal succeeded, but these counts do not show that every referenced
+module was available to the sample.
+
 This confirms that the 2026 product can load and expose a substantial real
 SysML v1 .mdzip model, including its SysML profile and attached model
 libraries. The probe is deliberately read-only and calls the product model
