@@ -25,6 +25,34 @@ model needs the application's EsiConfig service.
 
 ## Application-hosted project tests
 
+The reactor has a product-hosted Failsafe integration test for the selectable
+SysML v1 repository backend. Run it with the installed 2026 Community edition:
+
+```powershell
+mvn -B -Pmagicdraw-2026x-r1-community verify
+```
+
+This `verify` run does not set `skipITs`. Failsafe launches the installation's
+bundled Java runtime, opens a disposable copy of the installed SysML v1 sample,
+and asserts the 2026 backend maps models, blocks, and both diagram types. The
+test writes its mapping result and product console log under
+`edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw-2026/target/magicdraw-2026-it`.
+Override the installation selected by the profile with
+`-Dmagicdraw.installdir="C:\\path\\to\\Magic Systems of Systems Architect"`.
+
+The adapter HTTP acceptance tests remain available separately, using the
+standalone repository fixture so they do not require MagicDraw:
+
+```powershell
+mvn -B -Pacceptance verify
+```
+
+They exercise the catalog, service provider, query capability, block query, and
+individual block resource over HTTP. The product-hosted backend test verifies
+the 2026 SDK and repository mapping; it does not start the web server.
+
+### Manual runtime probes
+
 On the installed Windows workstation, run:
 
 ```powershell

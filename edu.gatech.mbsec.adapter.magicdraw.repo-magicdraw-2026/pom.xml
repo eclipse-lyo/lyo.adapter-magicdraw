@@ -109,5 +109,62 @@
       <scope>system</scope>
       <systemPath>${magicdraw.installdir}/plugins/com.nomagic.requirements/lib/com.nomagic.magicdraw.sysml-${magicdraw.version}.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <profiles>
+    <!-- This module is selected only for MagicDraw builds. Keep the product-hosted
+         integration test attached to the same profile so ordinary standalone builds
+         do not need the proprietary installation. -->
+    <profile>
+      <id>magicdraw-2026x-r1-community</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>3.7.1</version>
+            <executions>
+              <execution>
+                <id>magicdraw-integration-test-classpath</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>build-classpath</goal>
+                </goals>
+                <configuration>
+                  <includeScope>test</includeScope>
+                  <outputFile>${project.build.directory}/magicdraw-test-classpath.txt</outputFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>3.5.2</version>
+            <configuration>
+              <systemPropertyVariables>
+                <magicdraw.home>${magicdraw.installdir}</magicdraw.home>
+                <magicdraw.version>${magicdraw.version}</magicdraw.version>
+                <magicdraw.module.basedir>${project.basedir}</magicdraw.module.basedir>
+                <magicdraw.test.classpath>${project.build.directory}/magicdraw-test-classpath.txt</magicdraw.test.classpath>
+              </systemPropertyVariables>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

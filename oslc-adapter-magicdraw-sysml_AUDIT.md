@@ -501,3 +501,51 @@ existing behavior. In this sample, multiple diagrams share a name, so later
 exports overwrite earlier images in the flat directories even though all 23
 Block Definition and 5 Internal Block diagrams were mapped. The OSLC diagram
 resource counts above are unaffected.
+
+### 7.13 Integration tests without `skipITs` — 2026-09-30
+
+The 2026 repository module now has a Failsafe integration test bound to the
+`integration-test` and `verify` phases of the
+`magicdraw-2026x-r1-community` profile. It starts the installed product's
+bundled Java runtime, loads a disposable copy of the installed SysML v1 sample,
+and runs `SysmlRepositoryMagicDraw2026Impl` against the loaded project. It
+asserts that the backend registers a model, blocks, Block Definition diagrams,
+and Internal Block diagrams. A result file is written only after those
+assertions pass; it and the product console log are retained under the module's
+`target/magicdraw-2026-it` directory.
+
+The product-hosted test command completed successfully without setting
+`skipITs` or `skipTests`:
+
+```text
+mvn -B -Pmagicdraw-2026x-r1-community -pl :oslc4j-magicdraw-repo-magicdraw-2026 -am verify
+```
+
+Failsafe reported 1 test, 0 failures, 0 errors, and 0 skipped. The result was
+1 model, 122 blocks, 35 requirements, 10 interface blocks, 47 value types, 43
+part properties, 41 reference properties, 42 value properties, 14 flow
+properties, 1 item flow, 13 proxy ports, 10 full ports, 23 Block Definition
+diagrams, and 5 Internal Block diagrams. The 2026 sample copy is isolated under
+`target`; the installed sample is opened read-only and is not changed.
+
+The existing `acceptance` profile continues to run the OSLC HTTP tests against
+Jetty with the standalone fixture. Its command also completed successfully
+without `skipITs` or `skipTests`:
+
+```text
+mvn -B -Pacceptance verify
+```
+
+Surefire reported 7 unit tests and Failsafe reported 4 HTTP integration tests;
+both suites had 0 failures, 0 errors, and 0 skipped. These HTTP tests verify the
+catalog, service provider, query capability, block query, and individual block
+resource. They do not use the MagicDraw repository implementation. The new
+product-hosted test verifies the installed 2026 SDK and repository mapping; it
+does not start the HTTP server. This leaves live HTTP integration with the 2026
+backend and edit/save/reopen behavior on an editable Community project for
+future testing.
+
+The first harness run initially failed because the product redirects
+`System.out` to its own application log, rather than Maven's process stream.
+The integration test was changed to assert a success result file created by
+the probe after mapping assertions. The rerun then passed as reported above.
