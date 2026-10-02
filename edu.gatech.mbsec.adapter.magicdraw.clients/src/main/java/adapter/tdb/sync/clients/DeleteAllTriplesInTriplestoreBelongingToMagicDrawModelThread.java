@@ -16,11 +16,10 @@
 package adapter.tdb.sync.clients;
 
 import org.apache.jena.query.Dataset;
-import org.apache.jena.tdb.TDBFactory;
-import org.apache.jena.update.GraphStore;
+import org.apache.jena.tdb2.TDB2Factory;
+import org.apache.jena.update.UpdateExecution;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
 
 import util.TriplestoreUtil;
@@ -49,7 +48,8 @@ public class DeleteAllTriplesInTriplestoreBelongingToMagicDrawModelThread extend
 	public void start() {
 		// load model from triplestore
 		String directory = TriplestoreUtil.getTriplestoreLocation();
-		Dataset dataset = TDBFactory.createDataset(directory);
+		Dataset dataset = TDB2Factory.connectDataset(directory);
+		try {
 
 		// delete all triples where the resource, or predicate, or object is owned by a specific model
 		String queryString = 
@@ -63,11 +63,15 @@ public class DeleteAllTriplesInTriplestoreBelongingToMagicDrawModelThread extend
 		UpdateRequest query = UpdateFactory.create(queryString);
 
 		// Execute the query and obtain results
-		UpdateProcessor qe = UpdateExecutionFactory.create(query, (GraphStore) dataset.asDatasetGraph());
-		qe.execute();
+		dataset.executeWrite(() -> {
+			UpdateExecution qe = UpdateExecutionFactory.create(query, dataset);
+			qe.execute();
+		});
 		
 		
-		dataset.close();
+		} finally {
+			dataset.close();
+		}
 	}
 
 }

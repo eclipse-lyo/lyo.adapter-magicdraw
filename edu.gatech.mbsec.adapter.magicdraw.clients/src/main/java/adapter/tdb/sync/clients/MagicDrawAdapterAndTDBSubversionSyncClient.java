@@ -60,13 +60,7 @@ import org.glassfish.jersey.client.ClientConfig;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.tdb.TDBFactory;
-import org.apache.jena.update.UpdateExecutionFactory;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateProcessor;
-import org.apache.jena.update.UpdateRequest;
-
-
+import org.apache.jena.tdb2.TDB2Factory;
 import tdb.clients.DeleteAllTriplesInTriplestore;
 
 import util.TriplestoreUtil;

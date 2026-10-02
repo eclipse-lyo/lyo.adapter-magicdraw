@@ -35,7 +35,7 @@ import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.FileManager;
 
 public class PopulateTriplestoreWithSysMLBlocksAsRDF {
@@ -45,17 +45,23 @@ public class PopulateTriplestoreWithSysMLBlocksAsRDF {
 			public void start(){
 				// create TDB dataset
 				String directory = TriplestoreUtil.getTriplestoreLocation();
-				Dataset dataset = TDBFactory.createDataset(directory);
-
-				// populate model of TDB dataset with PTC Integrity requirements of RDF
-				// file
-				Model tdbModel = dataset.getDefaultModel();		
-				File file = new File("sample rdf/sysml_blocks.rdf");		
-				String source = "file:" + file.getAbsolutePath();
-				
-				FileManager.get().readModel(tdbModel, source);
-				tdbModel.close();
-				dataset.close();
+				Dataset dataset = TDB2Factory.connectDataset(directory);
+				try {
+					// populate model of TDB dataset with PTC Integrity requirements of RDF
+					// file
+					File file = new File("sample rdf/sysml_blocks.rdf");
+					String source = "file:" + file.getAbsolutePath();
+					dataset.executeWrite(() -> {
+						Model tdbModel = dataset.getDefaultModel();
+						try {
+							FileManager.get().readModel(tdbModel, source);
+						} finally {
+							tdbModel.close();
+						}
+					});
+				} finally {
+					dataset.close();
+				}
 			}
 		};
 		thread.start();		

@@ -5,7 +5,7 @@ standalone XML repository for development, demonstrations, and tests, or with
 the optional MagicDraw Java API repository when the proprietary SDK is
 available.
 
-The project currently targets Eclipse Lyo `7.0.0.Beta1` and Jakarta REST.
+The project currently targets Eclipse Lyo `7.0.0.Beta3` and Jakarta REST.
 
 ## Getting started
 
@@ -46,10 +46,13 @@ repository identify these more specific installation variants:
 | `magicdraw-17.0.5-sp1` | MagicDraw 17.0.5 SP1 | `C:/Program Files/MagicDraw` |
 | `magicdraw-18.0.1-sp1` | MagicDraw 18.0.1 SP1, named by the historical README | `C:/Program Files/MagicDraw` |
 | `magicdraw-18.0-sp6` | MagicDraw 18.0 SP6 LTR, reflected by the last legacy main-POM update | `C:/Program Files/MagicDraw` |
+| `magicdraw-2026x-r1-community` | Magic Systems of Systems Architect 2026x Refresh1 Community, SDK `2026.1.0-42-b71a9669` | `C:/Program Files/Magic Systems of Systems Architect` |
 
-These are historical compatibility targets, not claims of verification against
-the current Java 17/Jakarta migration. A build and runtime test with the
-corresponding proprietary installation is still required.
+The 17.x/18.x profiles identify historical compatibility targets; their
+presence is not a claim that those installations work with the current Java
+17/Jakarta migration. The 2026 Community profile has been compiled, packaged,
+and exercised against its installed product as described in the audit report.
+The legacy installations are not available in this environment.
 
 ## Repository architecture
 
@@ -58,13 +61,21 @@ corresponding proprietary installation is still required.
 - `edu.gatech.mbsec.adapter.magicdraw` contains the OSLC server and the
   standalone repository.
 - `edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw` contains the recovered
-  MagicDraw Java API implementation. It is excluded from the default reactor.
+  legacy MagicDraw Java API implementation. It is excluded from the default
+  reactor.
+- `edu.gatech.mbsec.adapter.magicdraw.repo-magicdraw-2026` contains the
+  separately compiled 2026 implementation of the same `SysmlRepository`
+  interface. The `magicdraw-2026x-r1-community` profile selects this artifact
+  for the distribution; the legacy implementation remains intact.
 - `edu.gatech.mbsec.adapter.magicdraw.distribution` overlays the server WAR and
-  packages the MagicDraw implementation. It is enabled with the generic
-  `non-standalone` profile or any version-specific MagicDraw profile.
+  packages the selected MagicDraw implementation and its version-specific
+  runtime libraries. It is enabled with the generic `non-standalone` profile
+  or one version-specific MagicDraw profile.
 
-There is one JAX-RS application and one manager path for both repository
-implementations.
+There is one JAX-RS application and manager path for both repository
+implementations. `MagicDrawManager` loads the class named by
+`sysml.repository.class`, so build one MagicDraw version per distribution and
+set that property to the implementation provided by the selected profile.
 
 ### Projects and models
 
@@ -165,6 +176,13 @@ the MagicDraw project loading, resource mapping, lookup, and mutation logic
 directly; there is no preserved-source directory, duplicate application class,
 or legacy-manager delegate.
 
+The 2026 Community implementation is maintained in the separate
+`repo-magicdraw-2026` module. It uses the same OSLC resources and repository
+interface while adapting the changed SysML stereotype and model traversal APIs.
+When embedded in the product's supported command-line/plugin host, call
+`loadSysMLProjectFromLoadedProject` to map its already-loaded `Project` without
+starting a second MagicDraw application instance.
+
 The distribution packages the JARs under the configured MagicDraw
 installation's `lib`, `lib/graphics`, `lib/webservice`, and SysML plugin
 directories. These libraries are installation-supplied and cannot be resolved
@@ -201,6 +219,15 @@ Run the selected distribution with:
 mvn clean package jetty:run-war "-Pmagicdraw-17.0.5-sp1" -am `
   -pl :oslc4jmagicdraw-magicdraw -DskipTests `
   "-Dsysml.repository.class=edu.gatech.mbsec.adapter.magicdraw.repository.SysmlRepositoryMagicDrawImpl"
+```
+
+For the installed 2026x Refresh1 Community edition, select its matching
+backend and runtime profile together:
+
+```powershell
+mvn clean package jetty:run-war "-Pmagicdraw-2026x-r1-community" -am `
+  -pl :oslc4jmagicdraw-magicdraw -DskipTests `
+  "-Dsysml.repository.class=edu.gatech.mbsec.adapter.magicdraw.repository.SysmlRepositoryMagicDraw2026Impl"
 ```
 
 ### Legacy POM reconciliation

@@ -131,33 +131,6 @@
 					<attachClasses>true</attachClasses>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.eclipse.jetty.ee10</groupId>
-				<artifactId>jetty-ee10-maven-plugin</artifactId>
-				<version>${version.jetty}</version>
-				<configuration>
-					<webApp>
-						<contextPath>/</contextPath>
-					</webApp>
-					<httpConnector>
-						<port>${jetty.http.port}</port>
-					</httpConnector>
-					<stopPort>8091</stopPort>
-					<stopKey>STOP</stopKey>
-				</configuration>
-				<executions>
-					<execution>
-						<id>start-jetty</id>
-						<phase>pre-integration-test</phase>
-						<goals><goal>start</goal></goals>
-					</execution>
-					<execution>
-						<id>stop-jetty</id>
-						<phase>post-integration-test</phase>
-						<goals><goal>stop</goal></goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -180,6 +153,33 @@
 			<id>acceptance</id>
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>org.eclipse.jetty.ee10</groupId>
+						<artifactId>jetty-ee10-maven-plugin</artifactId>
+						<version>${version.jetty}</version>
+						<configuration>
+							<webApp>
+								<contextPath>/</contextPath>
+							</webApp>
+							<httpConnector>
+								<port>${jetty.http.port}</port>
+							</httpConnector>
+							<stopPort>8091</stopPort>
+							<stopKey>STOP</stopKey>
+						</configuration>
+						<executions>
+							<execution>
+								<id>start-jetty</id>
+								<phase>pre-integration-test</phase>
+								<goals><goal>start</goal></goals>
+							</execution>
+							<execution>
+								<id>stop-jetty</id>
+								<phase>post-integration-test</phase>
+								<goals><goal>stop</goal></goals>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>

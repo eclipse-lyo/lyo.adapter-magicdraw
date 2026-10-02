@@ -28,7 +28,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.FileManager;
 
 public class QueryTriplestoreForMagicDrawResourcesOfSpecificModel2 {
@@ -37,38 +37,44 @@ public class QueryTriplestoreForMagicDrawResourcesOfSpecificModel2 {
 		
 		// load model from triplestore
 		String directory = TriplestoreUtil.getTriplestoreLocation();
-		Dataset dataset = TDBFactory.createDataset(directory);
-		Model model = dataset.getDefaultModel();
-		
-		
-		
-		// Create a new query
-		String queryString = 
-			"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-			"PREFIX sysml: <http://www.omg.org/sysml/> " +
-			"PREFIX sysml_namedelement: <http://www.omg.org/sysml/NamedElement/> " +
-			"SELECT ?magicdrawResource  " +
-//			"SELECT ?magicdrawResource ?name " +
-			"WHERE {" +
-			"    ?magicdrawResource  ?p ?o. " +	
-//			"FILTER ( regex(str(?simulinkResource), \"/services/sldemo_househeat\") ) " +
-			"FILTER ( regex(str(?magicdrawResource), \"/services/Wired_Camera_Example\") ) " +
-//			"    ?magicdrawResource sysml_namedelement:name ?name . " +
-//			"FILTER ( regex(str(?magicdrawResource), \"/services/SUV_Example/blocks/Blocks::Brake\") ) " +
-			"      }";
-		Query query = QueryFactory.create(queryString);
+		Dataset dataset = TDB2Factory.connectDataset(directory);
+		try {
+			dataset.executeRead(() -> {
+				Model model = dataset.getDefaultModel();
 
-		
-		
-		
-		// Execute the query and obtain results
-		QueryExecution qe = QueryExecutionFactory.create(query, model);
-		ResultSet results = qe.execSelect();
 
-		// Output query results	
-		ResultSetFormatter.out(System.out, results, query);
 
-		// Important - free up resources used running the query
-		qe.close();		
+				// Create a new query
+				String queryString =
+					"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+					"PREFIX sysml: <http://www.omg.org/sysml/> " +
+					"PREFIX sysml_namedelement: <http://www.omg.org/sysml/NamedElement/> " +
+					"SELECT ?magicdrawResource  " +
+		//			"SELECT ?magicdrawResource ?name " +
+					"WHERE {" +
+					"    ?magicdrawResource  ?p ?o. " +
+		//			"FILTER ( regex(str(?simulinkResource), \"/services/sldemo_househeat\") ) " +
+					"FILTER ( regex(str(?magicdrawResource), \"/services/Wired_Camera_Example\") ) " +
+		//			"    ?magicdrawResource sysml_namedelement:name ?name . " +
+		//			"FILTER ( regex(str(?magicdrawResource), \"/services/SUV_Example/blocks/Blocks::Brake\") ) " +
+					"      }";
+				Query query = QueryFactory.create(queryString);
+
+
+
+
+				// Execute the query and obtain results
+				try (QueryExecution qe = QueryExecutionFactory.create(query, model)) {
+					ResultSet results = qe.execSelect();
+
+					// Output query results
+					ResultSetFormatter.out(System.out, results, query);
+
+					// Important - free up resources used running the query
+				}
+			});
+		} finally {
+			dataset.close();
+		}
 	}
 }

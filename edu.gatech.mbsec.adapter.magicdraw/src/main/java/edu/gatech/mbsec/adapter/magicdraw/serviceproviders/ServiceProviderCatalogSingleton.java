@@ -25,8 +25,10 @@ package edu.gatech.mbsec.adapter.magicdraw.serviceproviders;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -128,9 +130,10 @@ public class ServiceProviderCatalogSingleton {
 	public static ServiceProvider registerServiceProvider(final HttpServletRequest httpServletRequest,
 			final ServiceProvider serviceProvider, final String productId) throws URISyntaxException {
 		synchronized (serviceProviders) {
-			final URI serviceProviderURI = new URI(httpServletRequest.getScheme(), null,
+			final URI contextURI = new URI(httpServletRequest.getScheme(), null,
 					httpServletRequest.getServerName(), httpServletRequest.getServerPort(),
-					httpServletRequest.getContextPath() + "/serviceProviders/" + productId, null, null);
+					httpServletRequest.getContextPath() + "/", null, null);
+			final URI serviceProviderURI = serviceProviderUri(contextURI, productId);
 
 			return registerServiceProviderNoSync(serviceProviderURI, serviceProvider, productId);
 		}
@@ -164,9 +167,25 @@ public class ServiceProviderCatalogSingleton {
 	static ServiceProvider registerServiceProvider(final String baseURI, final ServiceProvider serviceProvider,
 			final String productId) throws URISyntaxException {
 		synchronized (serviceProviders) {
-			final URI serviceProviderURI = new URI(baseURI + "/serviceProviders/" + productId);
+			final URI serviceProviderURI = serviceProviderUri(new URI(ensureTrailingSlash(baseURI)), productId);
 
 			return registerServiceProviderNoSync(serviceProviderURI, serviceProvider, productId);
+		}
+	}
+
+	private static URI serviceProviderUri(final URI baseURI, final String productId) {
+		return baseURI.resolve("serviceProviders/" + encodePathSegment(productId));
+	}
+
+	private static String ensureTrailingSlash(final String value) {
+		return value.endsWith("/") ? value : value + "/";
+	}
+
+	private static String encodePathSegment(final String value) {
+		try {
+			return URLEncoder.encode(value, "UTF-8").replace("+", "%20");
+		} catch (final UnsupportedEncodingException e) {
+			throw new IllegalStateException("The Java runtime does not support UTF-8", e);
 		}
 	}
 
